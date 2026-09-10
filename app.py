@@ -5,11 +5,16 @@ st.set_page_config(page_title="LH매입 공유방 Q&A", page_icon="🏠")
 st.title("🏠 전세사기특별법 LH매입 Q&A 챗봇 (무료)")
 st.caption("카카오톡 단톡방의 기존 질문과 대화 내역을 기반으로 답변합니다.")
 
-# 대화 내역 로드
+# 대화 내역 로드 (무료 1분당 토큰 제한 초과 방지를 위해 텍스트 길이 제한)
 @st.cache_data
 def load_chat():
-    with open("KakaoTalkChats.txt", "r", encoding="utf-8") as f:
-        return f.read()
+    try:
+        with open("KakaoTalkChats.txt", "r", encoding="utf-8") as f:
+            text = f.read()
+            # 무료 요금제 1분당 데이터 제한을 넘지 않도록 앞부분 35,000자만 사용합니다.
+            return text[:35000]
+    except FileNotFoundError:
+        return ""
 
 chat_context = load_chat()
 
@@ -25,7 +30,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # 질문 처리
-if prompt := st.chat_input("질문을 입력하세요 (예: 감평사 예상가 어떻게 물어보나요?)"):
+if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어떻게 물어보나요?)"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -35,8 +40,8 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평사 예상가 
     else:
         try:
             genai.configure(api_key=api_key)
-            # 무료이며 성능이 뛰어난 gemini-1.5-flash 모델 사용
-            model = genai.GenerativeModel("gemini-3.6-flash")
+            # 가장 표준적이고 빠른 무료 플래시 모델 설정
+            model = genai.GenerativeModel("gemini-2.5-flash")
             
             system_instruction = f"""
             너는 전세사기특별법 LH매입 카카오톡 단체방의 대화 기록을 기반으로 주민들의 질문에 답해주는 조력자 AI야.
