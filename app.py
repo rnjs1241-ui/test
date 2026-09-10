@@ -40,7 +40,7 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
         try:
             genai.configure(api_key=api_key)
             # 무료 할당량이 안정적인 정식 모델 적용
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            model = genai.GenerativeModel("gemini-2.0-flash")
             
             system_instruction = f"""
             너는 전세사기특별법 LH매입 카카오톡 단체방의 대화 기록을 기반으로 주민들의 질문에 답해주는 조력자 AI야.
