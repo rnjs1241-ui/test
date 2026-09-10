@@ -5,7 +5,7 @@ st.set_page_config(page_title="LH매입 공유방 Q&A", page_icon="🏠")
 st.title("🏠 전세사기특별법 LH매입 Q&A 챗봇 (무료)")
 st.caption("카카오톡 단톡방의 기존 질문과 대화 내역을 기반으로 답변합니다.")
 
-# 대화 내역 로드 (무료 1분당 토큰 제한(429) 초과 방지를 위해 20,000자로 조정)
+# 대화 내역 로드 (무료 1분당 토큰 제한 방지를 위해 20,000자로 조정)
 @st.cache_data
 def load_chat():
     try:
@@ -39,8 +39,8 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
     else:
         try:
             genai.configure(api_key=api_key)
-            # 지원이 보장된 최신 표준 모델로 변경
-            model = genai.GenerativeModel("gemini-2.0-flash")
+            # 권장 표준 모델 적용
+            model = genai.GenerativeModel("gemini-3.6-flash")
             
             system_instruction = f"""
             너는 전세사기특별법 LH매입 카카오톡 단체방의 대화 기록을 기반으로 주민들의 질문에 답해주는 조력자 AI야.
@@ -57,8 +57,8 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            # 429 사용량 제한 발생 시 사용자 안내 메시지 출력
+            # 429 무료 할당량 초과 시 예외 처리
             if "429" in str(e) or "Quota exceeded" in str(e):
-                st.warning("⏱️ 현재 이용자가 많아 일시적으로 제한되었습니다. 약 30초 후 다시 질문해 주세요!")
+                st.warning("⏱️ 현재 무료 이용 한도(429)에 도달했습니다. 약 30초~1분 뒤 다시 질문해 주세요!")
             else:
                 st.error(f"답변 생성 중 오류가 발생했습니다: {e}")
