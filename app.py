@@ -39,7 +39,7 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
     else:
         try:
             genai.configure(api_key=api_key)
-            # 무료 할당량이 안정적인 정식 모델 적용
+            # 지원이 보장된 최신 표준 모델로 변경
             model = genai.GenerativeModel("gemini-2.0-flash")
             
             system_instruction = f"""
@@ -57,8 +57,8 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            # 429 (사용량 초과) 에러 감지 시 친절한 안내 메시지 출력
+            # 429 사용량 제한 발생 시 사용자 안내 메시지 출력
             if "429" in str(e) or "Quota exceeded" in str(e):
-                st.warning("⏱️ 현재 요청이 많아 일시적으로 제한되었습니다. 약 30초 후 다시 시도해 주세요!")
+                st.warning("⏱️ 현재 이용자가 많아 일시적으로 제한되었습니다. 약 30초 후 다시 질문해 주세요!")
             else:
                 st.error(f"답변 생성 중 오류가 발생했습니다: {e}")
