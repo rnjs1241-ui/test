@@ -39,8 +39,8 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
     else:
         try:
             genai.configure(api_key=api_key)
-            # 구글 지정 권장 모델 사용
-            model = genai.GenerativeModel("gemini-3.6-flash")
+            # 무료 할당량이 안정적인 정식 모델 적용
+            model = genai.GenerativeModel("gemini-1.5-flash")
             
             system_instruction = f"""
             너는 전세사기특별법 LH매입 카카오톡 단체방의 대화 기록을 기반으로 주민들의 질문에 답해주는 조력자 AI야.
@@ -57,4 +57,8 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
                 st.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"답변 생성 중 오류가 발생했습니다: {e}")
+            # 429 (사용량 초과) 에러 감지 시 친절한 안내 메시지 출력
+            if "429" in str(e) or "Quota exceeded" in str(e):
+                st.warning("⏱️ 현재 요청이 많아 일시적으로 제한되었습니다. 약 30초 후 다시 시도해 주세요!")
+            else:
+                st.error(f"답변 생성 중 오류가 발생했습니다: {e}")
