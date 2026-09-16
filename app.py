@@ -40,7 +40,7 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
         try:
             genai.configure(api_key=api_key)
             # 권장 표준 모델 적용
-            model = genai.GenerativeModel("gemini-3.6-flash")
+            model = genai.GenerativeModel("gemini-1.5-flash")
             
             system_instruction = f"""
             너는 전세사기특별법 LH매입 카카오톡 단체방의 대화 기록을 기반으로 주민들의 질문에 답해주는 조력자 AI야.
@@ -53,9 +53,53 @@ if prompt := st.chat_input("질문을 입력하세요 (예: 감평 예상가 어
             full_prompt = f"{system_instruction}\n\n사용자 질문: {prompt}"
             
             with st.chat_message("assistant"):
+                # 애니메이션을 표시할 공간 확보
+                placeholder = st.empty()
+                
+                # 로딩 애니메이션 및 안내 문구 HTML/CSS
+                loading_html = """
+                <style>
+                @keyframes pulse-emoji {
+                    0%, 100% { transform: scale(0.9); opacity: 0.5; }
+                    50% { transform: scale(1.4); opacity: 1; }
+                }
+                .loading-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: #4A5568;
+                    padding: 8px 0;
+                }
+                .pulse-emoji {
+                    display: inline-block;
+                    font-size: 18px;
+                    animation: pulse-emoji 1.2s infinite ease-in-out;
+                }
+                .e1 { animation-delay: 0.0s; }
+                .e2 { animation-delay: 0.3s; }
+                .e3 { animation-delay: 0.6s; }
+                </style>
+
+                <div class="loading-box">
+                    약 2년간 쌓인 대화 내용을 분석하여 답변을 생성하는 중...
+                    <span class="pulse-emoji e1">🔍</span>
+                    <span class="pulse-emoji e2">💭</span>
+                    <span class="pulse-emoji e3">🧠</span>
+                </div>
+                """
+                
+                # 대기 상태 애니메이션 노출
+                placeholder.markdown(loading_html, unsafe_allow_html=True)
+                
+                # API 호출 및 답변 생성
                 response = model.generate_content(full_prompt)
-                st.markdown(response.text)
+                
+                # 완료 후 로딩 애니메이션을 지우고 최종 답변 표시
+                placeholder.markdown(response.text)
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
+
         except Exception as e:
             # 429 무료 할당량 초과 시 예외 처리
             if "429" in str(e) or "Quota exceeded" in str(e):
